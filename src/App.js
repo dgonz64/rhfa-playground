@@ -1,6 +1,6 @@
 import React from 'react';
 import './App.css';
-import { createSchema, Autoform } from 'react-hook-form-auto'
+import { createSchema, Autoform, addTranslations } from 'react-hook-form-auto'
 
 const thing = createSchema('thing', {
   name: {
@@ -15,6 +15,26 @@ const thing = createSchema('thing', {
     options: ['solid', 'liquid', 'gas']
   }
 });
+
+addTranslations({
+  models: {
+    thing: {
+      name: {
+        _field: 'Name'
+      },
+      mass: {
+        _field: 'Mass'
+      },
+      type: {
+        _field: 'Type',
+        _default: 'Select type',
+        solid: 'Solid',
+        liquid: 'Liquid',
+        gas: 'Gas'
+      }
+    }
+  }
+})
 
 function App() {
   return (
