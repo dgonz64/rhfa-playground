@@ -30,10 +30,9 @@ const ControlAdaptor = props => {
 export default {
   defaultWrap: ({ children }) => children,
   string: {
-    render: props => ({
-      ...props,
+    render: {
       component: ControlAdaptor,
       adaptorComponent: TextField
-    })
+    }
   }
 }
