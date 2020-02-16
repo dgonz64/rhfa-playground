@@ -1,6 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './App.css';
-import { createSchema, Autoform, addTranslations } from 'react-hook-form-auto'
+import {
+  createSchema,
+  Autoform,
+  addTranslations,
+  tr
+} from 'react-hook-form-auto'
 import styles from 'rhfa-emergency-styles'
 import 'rhfa-emergency-styles/dist/styles.css'
 
@@ -35,18 +40,23 @@ addTranslations({
         gas: 'Gas'
       }
     }
-  }
+  },
+  submit: 'Submit'
 })
 
 function App() {
+  const [ submitted, submit ] = useState({})
+
   return (
     <div className="App">
-      <header className="App-header">
-        <Autoform
-          schema={thing}
-          styles={styles}
-        />
-      </header>
+      <Autoform
+        schema={thing}
+        styles={styles}
+        onSubmit={submit}
+        submitButton
+        submitButtonText={tr('submit')}
+      />
+      <pre>{JSON.stringify(submitted)}</pre>
     </div>
   );
 }
