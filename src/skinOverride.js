@@ -169,12 +169,15 @@ export default {
           setValue(name, value)
         }
 
+        const { sliderParams } = fieldSchema
+
         return (
           <div>
             <Typography id={name}>
               {trField(props)}
             </Typography>
             <Slider
+              {...sliderParams}
               defaultValue={defaultValue || 0}
               aria-labelledby="discrete-slider"
               valueLabelDisplay="auto"

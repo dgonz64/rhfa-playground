@@ -52,7 +52,11 @@ const thing = createSchema('thing', {
   solid: {
     type: 'range',
     min: -273.15,
-    max: 1000
+    max: 1000,
+    sliderParams: {
+      step: 10,
+      marks: [{ value: 0, label: '0 º' }, { value: 100, label: '100 º' }]
+    }
   }
 });
 
