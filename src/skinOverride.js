@@ -1,7 +1,15 @@
 import React from 'react'
 import TextField from '@material-ui/core/TextField'
 import MenuItem from '@material-ui/core/MenuItem'
-import { trModel, tr, processOptions } from 'react-hook-form-auto'
+import FormControlLabel from '@material-ui/core/FormControlLabel'
+import FormLabel from '@material-ui/core/FormLabel'
+import RadioGroup from '@material-ui/core/RadioGroup'
+import Radio from '@material-ui/core/Radio'
+import Checkbox from '@material-ui/core/Checkbox'
+import Typography from '@material-ui/core/Typography'
+import Slider from '@material-ui/core/Slider'
+import Button from '@material-ui/core/Button'
+import { trField, tr, processOptions } from 'react-hook-form-auto'
 
 const ControlAdaptor = props => {
   const {
@@ -12,7 +20,6 @@ const ControlAdaptor = props => {
 
     field,
     fieldSchema,
-    schemaTypeName,
     adaptorComponent,
     register
   } = props
@@ -22,15 +29,18 @@ const ControlAdaptor = props => {
   const Comp = adaptorComponent
 
   return (
-    <Comp
-      {...controlProps}
-      name={name}
-      defaultValue={defaultValue}
-      inputProps={{ ref: register }}
-      label={trModel(schemaTypeName, field, '_field')}
-      error={!!errorText}
-      helperText={errorText}
-    />
+    <div>
+      <Comp
+        {...controlProps}
+        key={name}
+        name={name}
+        defaultValue={defaultValue || ''}
+        inputProps={{ ref: register }}
+        label={trField(props)}
+        error={!!errorText}
+        helperText={errorText}
+      />
+    </div>
   )
 }
 
@@ -43,19 +53,26 @@ export default {
     }
   },
   number: {
+    coerce: value => parseFloat(value),
     render: {
       component: ControlAdaptor,
       adaptorComponent: TextField,
       controlProps: { type: 'number' }
     }
   },
+  password: {
+    render: {
+      component: ControlAdaptor,
+      adaptorComponent: TextField,
+      controlProps: { type: 'password' }
+    }
+  },
   select: {
     render: (props) => {
       const { schemaTypeName, name, field, fieldSchema, register, setValue } = props
+
       const options = processOptions({
-        schemaTypeName,
-        field,
-        options: fieldSchema.options,
+        ...props,
         addDefault: true
       })
 
@@ -79,5 +96,111 @@ export default {
         }
       }
     }
+  },
+  boolean: {
+    coerce: value => Boolean(value),
+    render: {
+      component: (props) => {
+        const { register, name, defaultValue } = props
+
+        return (
+          <div>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  name={name}
+                  inputProps={{ ref: register }}
+                  defaultValue={defaultValue}
+                />
+              }
+              label={trField(props)}
+            />
+          </div>
+        )
+      }
+    }
+  },
+  radios: {
+    render: {
+      component: (props) => {
+        const { name, register, defaultValue } = props
+
+        const label = trField(props)
+        const options = processOptions(props)
+        const inputProps = {
+          ref: register
+        }
+
+        return (
+          <div>
+            <FormLabel component="legend">
+              {label}
+            </FormLabel>
+            <RadioGroup
+              aria-label={label}
+              name={name}
+              defaultValue={defaultValue || 0}
+            >
+              {
+                options.map(op =>
+                  <FormControlLabel
+                    name={name}
+                    key={op.value}
+                    value={op.value}
+                    control={<Radio inputProps={inputProps} />}
+                    label={op.label}
+                  />
+                )
+              }
+            </RadioGroup>
+          </div>
+        )
+      }
+    }
+  },
+  range: {
+    coerce: value => parseFloat(value),
+    render: {
+      component: (props) => {
+        const { name, defaultValue, fieldSchema, register, setValue } = props
+
+        register({ name })
+        const setValueFromEvent = (event, value) => {
+          setValue(name, value)
+        }
+
+        return (
+          <div>
+            <Typography id={name}>
+              {trField(props)}
+            </Typography>
+            <Slider
+              defaultValue={defaultValue || 0}
+              aria-labelledby="discrete-slider"
+              valueLabelDisplay="auto"
+              min={fieldSchema.min}
+              max={fieldSchema.max}
+              onChange={setValueFromEvent}
+            />
+          </div>
+        )
+      }
+    }
+  },
+  button: {
+    render: ({ children, onClick }) =>
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={onClick}
+      >
+        {children}
+      </Button>
+  },
+  form: {
+    render: ({ children, onSubmit }) =>
+      <form onSubmit={onSubmit}>
+        {children}
+      </form>
   }
 }

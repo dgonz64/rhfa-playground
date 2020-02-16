@@ -8,16 +8,24 @@ import {
   tr
 } from 'react-hook-form-auto';
 import styles from 'rhfa-emergency-styles';
-import 'rhfa-emergency-styles/dist/styles.css';
 import { makeStyles } from '@material-ui/core/styles';
+import Container from '@material-ui/core/Container'
 import muiComponents from './skinOverride';
+
+const width = 400
 
 const useStyles = makeStyles(theme => ({
   root: {
-    '& *': {
-      width: '100%'
+    '& .MuiTextField-root': {
+      width
+    },
+    '& .MuiSlider-root': {
+      width
     }
-  }
+  },
+  withoutLabel: {
+    marginTop: theme.spacing(3)
+  },
 }));
 
 const thing = createSchema('thing', {
@@ -26,11 +34,25 @@ const thing = createSchema('thing', {
     required: true
   },
   mass: {
-    type: 'number'
+    type: 'number',
+    min: 0,
+    max: 20
   },
-  type: {
+  state: {
     type: 'select',
     options: ['solid', 'liquid', 'gas']
+  },
+  rare: {
+    type: 'boolean'
+  },
+  magnetic: {
+    type: 'radios',
+    options: ['ferro', 'diam']
+  },
+  solid: {
+    type: 'range',
+    min: -273.15,
+    max: 1000
   }
 });
 
@@ -44,12 +66,21 @@ addTranslations({
       mass: {
         _field: 'Mass'
       },
-      type: {
-        _field: 'Type',
+      state: {
+        _field: 'State',
         _default: 'Select type',
         solid: 'Solid',
         liquid: 'Liquid',
         gas: 'Gas'
+      },
+      rare: 'Is a rare material',
+      magnetic: {
+        _field: 'Magnetic type',
+        ferro: 'Ferromagnetic',
+        diam: 'Diamagnetic'
+      },
+      solid: {
+        _field: 'Solidification temperature'
       }
     }
   },
@@ -59,20 +90,23 @@ addTranslations({
 function App() {
   const [ submitted, submit ] = useState({});
   const classes = useStyles();
+  const hasSubmitData = Object.keys(submitted).length > 0
 
   return (
     <div className={classes.root}>
-      <Autoform
-        schema={thing}
-        styles={styles}
-        onSubmit={submit}
-        submitButton
-        submitButtonText={tr('submit')}
-        skinOverride={muiComponents}
-      />
-      <pre>{JSON.stringify(submitted)}</pre>
+      <Container maxWidth="sm">
+        <Autoform
+          schema={thing}
+          styles={styles}
+          onSubmit={submit}
+          submitButton
+          submitButtonText={tr('submit')}
+          skinOverride={muiComponents}
+        />
+      </Container>
+      <pre>{hasSubmitData && JSON.stringify(submitted)}</pre>
     </div>
-  );
+  )
 }
 
 export default App;
