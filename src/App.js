@@ -1,6 +1,8 @@
 import React from 'react';
 import './App.css';
 import { createSchema, Autoform, addTranslations } from 'react-hook-form-auto'
+import styles from 'rhfa-emergency-styles'
+import 'rhfa-emergency-styles/dist/styles.css'
 
 const thing = createSchema('thing', {
   name: {
@@ -42,6 +44,7 @@ function App() {
       <header className="App-header">
         <Autoform
           schema={thing}
+          styles={styles}
         />
       </header>
     </div>

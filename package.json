@@ -10,7 +10,8 @@
     "react-dom": "^16.12.0",
     "react-hook-form": "^4.9.4",
     "react-hook-form-auto": "^1.1.1",
-    "react-scripts": "3.4.0"
+    "react-scripts": "3.4.0",
+    "rhfa-emergency-styles": "^1.0.0"
   },
   "scripts": {
     "start": "react-scripts start",
