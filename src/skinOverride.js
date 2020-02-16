@@ -1,6 +1,7 @@
 import React from 'react'
 import TextField from '@material-ui/core/TextField'
-import { trModel, tr } from 'react-hook-form-auto'
+import MenuItem from '@material-ui/core/MenuItem'
+import { trModel, tr, processOptions } from 'react-hook-form-auto'
 
 const ControlAdaptor = props => {
   const {
@@ -46,6 +47,31 @@ export default {
       component: ControlAdaptor,
       adaptorComponent: TextField,
       controlProps: { type: 'number' }
+    }
+  },
+  select: {
+    render: (props) => {
+      const { schemaTypeName, field, fieldSchema } = props
+      const options = processOptions({
+        schemaTypeName,
+        field,
+        options: fieldSchema.options,
+        addDefault: true
+      })
+
+      return {
+        ...props,
+        component: ControlAdaptor,
+        adaptorComponent: TextField,
+        controlProps: {
+          select: true,
+          children: options.map(op =>
+            <MenuItem key={op.value} value={op.value}>
+              {op.label}
+            </MenuItem>
+          )
+        }
+      }
     }
   }
 }
