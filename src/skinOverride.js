@@ -3,13 +3,25 @@ import TextField from '@material-ui/core/TextField'
 import { trModel } from 'react-hook-form-auto'
 
 const ControlAdaptor = props => {
-  const { schemaTypeName, field } = props
+  const {
+    name,
+    defaultValue,
+    controlProps,
 
-  const Comp = props.adaptorComponent
+    field,
+    schemaTypeName,
+    adaptorComponent,
+    register
+  } = props
+
+  const Comp = adaptorComponent
 
   return (
     <Comp
-      {...props}
+      {...controlProps}
+      name={name}
+      defaultValue={defaultValue}
+      inputProps={{ ref: register }}
       label={trModel(schemaTypeName, field, '_field')}
     />
   )
