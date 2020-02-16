@@ -4,6 +4,7 @@ import {
   createSchema,
   Autoform,
   addTranslations,
+  setLanguageByName,
   tr
 } from 'react-hook-form-auto';
 import styles from 'rhfa-emergency-styles';
@@ -33,6 +34,7 @@ const thing = createSchema('thing', {
   }
 });
 
+setLanguageByName('en')
 addTranslations({
   models: {
     thing: {
