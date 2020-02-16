@@ -34,5 +34,12 @@ export default {
       component: ControlAdaptor,
       adaptorComponent: TextField
     }
+  },
+  number: {
+    render: {
+      component: ControlAdaptor,
+      adaptorComponent: TextField,
+      controlProps: { type: 'number' }
+    }
   }
 }
