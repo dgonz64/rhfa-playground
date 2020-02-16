@@ -1,14 +1,23 @@
 import React from 'react'
-import TextField from '@material-ui/core/TextField'
-import MenuItem from '@material-ui/core/MenuItem'
-import FormControlLabel from '@material-ui/core/FormControlLabel'
-import FormLabel from '@material-ui/core/FormLabel'
-import RadioGroup from '@material-ui/core/RadioGroup'
-import Radio from '@material-ui/core/Radio'
-import Checkbox from '@material-ui/core/Checkbox'
-import Typography from '@material-ui/core/Typography'
-import Slider from '@material-ui/core/Slider'
-import Button from '@material-ui/core/Button'
+import {
+  TextField,
+  MenuItem,
+  FormControlLabel,
+  FormLabel,
+  RadioGroup,
+  Radio,
+  Checkbox,
+  Typography,
+  Slider,
+  Button,
+  IconButton,
+  Card,
+  CardContent
+} from '@material-ui/core'
+import AddIcon from '@material-ui/icons/Add'
+import RemoveIcon from '@material-ui/icons/Remove'
+import { ArrayTable } from './components/ArrayTable'
+import { ArrayPanel } from './components/ArrayPanel'
 import { trField, tr, processOptions } from 'react-hook-form-auto'
 
 const ControlAdaptor = props => {
@@ -173,7 +182,7 @@ export default {
 
         return (
           <div>
-            <Typography id={name}>
+            <Typography id={name} gutterBottom>
               {trField(props)}
             </Typography>
             <Slider
@@ -191,19 +200,48 @@ export default {
     }
   },
   button: {
-    render: ({ children, onClick }) =>
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={onClick}
-      >
-        {children}
-      </Button>
+    render: ({ styles, ...rest }) => {
+      if (rest.type == 'submit')
+        return <Button color="primary" {...rest} />
+      else
+        return <Button {...rest} />
+    }
+  },
+  arrayButton: {
+    render: ({ styles, ...rest }) =>
+      <IconButton size="small" {...rest} />
   },
   form: {
     render: ({ children, onSubmit }) =>
       <form onSubmit={onSubmit}>
         {children}
       </form>
+  },
+  panel: {
+    render: ({ children, header }) =>
+      <Card>
+        <CardContent>
+          <Typography color="textSecondary" gutterBottom>
+            {header}
+          </Typography>
+          <Typography variant="body2" component="p">
+            {children}
+          </Typography>
+        </CardContent>
+      </Card>
+  },
+  addGlyph: {
+    render: () =>
+      <AddIcon fontSize="small" />
+  },
+  removeGlyph: {
+    render: () =>
+      <RemoveIcon fontSize="small" />
+  },
+  arrayTable: {
+    render: ArrayTable
+  },
+  arrayPanel: {
+    render: ArrayPanel
   }
 }

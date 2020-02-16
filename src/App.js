@@ -12,7 +12,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container'
 import muiComponents from './skinOverride';
 
-const width = 400
+const width = '90%'
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -21,12 +21,27 @@ const useStyles = makeStyles(theme => ({
     },
     '& .MuiSlider-root': {
       width
+    },
+    '& .MuiCard-root': {
+      maxWidth: width
     }
   },
   withoutLabel: {
     marginTop: theme.spacing(3)
   },
 }));
+
+const component = createSchema('component', {
+  name: {
+    type: 'string',
+    required: true
+  },
+  temperature: {
+    type: 'number',
+    min: -273.15,
+    max: 1000
+  },
+})
 
 const thing = createSchema('thing', {
   name: {
@@ -57,6 +72,12 @@ const thing = createSchema('thing', {
       step: 10,
       marks: [{ value: 0, label: '0 º' }, { value: 100, label: '100 º' }]
     }
+  },
+  components: {
+    type: [component]
+  },
+  main: {
+    type: component
   }
 });
 
@@ -85,7 +106,13 @@ addTranslations({
       },
       solid: {
         _field: 'Solidification temperature'
-      }
+      },
+      components: 'Components'
+    },
+    component: {
+      main: 'Main component',
+      name: 'Name',
+      temperature: 'Temperature'
     }
   },
   submit: 'Submit'
