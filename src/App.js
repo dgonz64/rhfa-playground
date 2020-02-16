@@ -5,9 +5,19 @@ import {
   Autoform,
   addTranslations,
   tr
-} from 'react-hook-form-auto'
-import styles from 'rhfa-emergency-styles'
-import 'rhfa-emergency-styles/dist/styles.css'
+} from 'react-hook-form-auto';
+import styles from 'rhfa-emergency-styles';
+import 'rhfa-emergency-styles/dist/styles.css';
+import { makeStyles } from '@material-ui/core/styles';
+import muiComponents from './skinOverride';
+
+const useStyles = makeStyles(theme => ({
+  root: {
+    '& *': {
+      width: '100%'
+    }
+  }
+}));
 
 const thing = createSchema('thing', {
   name: {
@@ -42,19 +52,21 @@ addTranslations({
     }
   },
   submit: 'Submit'
-})
+});
 
 function App() {
-  const [ submitted, submit ] = useState({})
+  const [ submitted, submit ] = useState({});
+  const classes = useStyles();
 
   return (
-    <div className="App">
+    <div className={classes.root}>
       <Autoform
         schema={thing}
         styles={styles}
         onSubmit={submit}
         submitButton
         submitButtonText={tr('submit')}
+        skinOverride={muiComponents}
       />
       <pre>{JSON.stringify(submitted)}</pre>
     </div>
