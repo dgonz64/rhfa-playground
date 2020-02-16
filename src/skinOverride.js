@@ -51,7 +51,7 @@ export default {
   },
   select: {
     render: (props) => {
-      const { schemaTypeName, field, fieldSchema } = props
+      const { schemaTypeName, name, field, fieldSchema, register, setValue } = props
       const options = processOptions({
         schemaTypeName,
         field,
@@ -59,12 +59,18 @@ export default {
         addDefault: true
       })
 
+      register({ name })
+      const setValueFromEvent = event => {
+        setValue(name, event.target.value)
+      }
+
       return {
         ...props,
         component: ControlAdaptor,
         adaptorComponent: TextField,
         controlProps: {
           select: true,
+          onChange: setValueFromEvent,
           children: options.map(op =>
             <MenuItem key={op.value} value={op.value}>
               {op.label}
