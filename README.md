@@ -4,8 +4,16 @@ Let's create a material-ui ui with the help of `create-react-app`.
 
 ## Table of contents
 
-- [Basics](#basics)
-- [String component](#string-component)
+* [Basics](#basics)
+* [String component](#string-component)
+  * [Ways to set up render](#small-change)
+  * [Numbers](#numbers)
+* [Error reporting](#error-reporting)
+* [Select](#adapting-select)
+* [Rest of the components](#rest)
+* [Pass parameters from schema](#tip-pass-parameters-from-schema)
+* [Input array](#inputarray)
+* [Thanks](#final-words)
 
 ## Basics
 
@@ -104,7 +112,7 @@ Hopefully we see some (really ugly) form in the screen. The first thing I realiz
      <div className="App">
 ```
 
-Result here. After this change if we take a look at the browser we see that labels are good now but it's still ugly. Let's import emergency styles for now. We take the direct css-without-modules route. First install it:
+Result [here](https://github.com/dgonz64/rhfa-playground/blob/34e4741cc1a30864d01c344f7e56efdaac511886/src/App.js). After this change if we take a look at the browser we see that labels are good now but it's still ugly. Let's import emergency styles for now. We take the direct css-without-modules route. First install it:
 
     $ yarn add rhfa-emergency-styles -S
 
@@ -305,24 +313,18 @@ It's the time to take advantage of the `controlProps` we set up in `ControlAdapt
 
 ## Error reporting
 
-We have to print the validation errors. First of all we will set the default language in order to get also the default translation for basic validations:
+We have to print the validation errors. First of all we will set the default language in order to get also the default translation for basic validations. In `src/App.js`:
 
 ```diff
-diff --git a/src/App.js b/src/App.js
-index d26f4ca..a0c2888 100644
---- a/src/App.js
-+++ b/src/App.js
-@@ -4,6 +4,7 @@ import {
+import {
    createSchema,
    Autoform,
    addTranslations,
 +  setLanguageByName,
    tr
  } from 'react-hook-form-auto';
- import styles from 'rhfa-emergency-styles';
-@@ -33,6 +34,7 @@ const thing = createSchema('thing', {
-   }
- });
+ 
+ // ...
  
 +setLanguageByName('en')
  addTranslations({
@@ -330,14 +332,9 @@ index d26f4ca..a0c2888 100644
      thing: {
 ```
 
-Then we wire the `react-hook-form-auto` error messages to Material-UI.
+Then we wire the `react-hook-form-auto` error messages to Material-UI in `src/skinOverride.js`:
 
 ```diff
-diff --git a/src/skinOverride.js b/src/skinOverride.js
-index 80375ed..b6a1e0e 100644
---- a/src/skinOverride.js
-+++ b/src/skinOverride.js
-@@ -1,19 +1,23 @@
  import React from 'react'
  import TextField from '@material-ui/core/TextField'
 -import { trModel } from 'react-hook-form-auto'
@@ -361,8 +358,9 @@ index 80375ed..b6a1e0e 100644
 +  const errorText = typeof error == 'object' ? tr(error.message, fieldSchema) : ''
    const Comp = adaptorComponent
  
-   return (
-@@ -23,6 +27,8 @@ const ControlAdaptor = props => {
+   // ...
+
+const ControlAdaptor = props => {
        defaultValue={defaultValue}
        inputProps={{ ref: register }}
        label={trModel(schemaTypeName, field, '_field')}
@@ -387,9 +385,8 @@ This is easy by following Material-UI documentaton. I just want to note that we 
 +import MenuItem from '@material-ui/core/MenuItem'
 +import { trModel, tr, processOptions } from 'react-hook-form-auto'
  
- const ControlAdaptor = props => {
-   const {
-@@ -47,5 +48,30 @@ export default {
+ // ...
+
        adaptorComponent: TextField,
        controlProps: { type: 'number' }
      }
@@ -429,12 +426,8 @@ Nice, except it doesn't work! We need ReactHookForm to notice it. There are mult
      render: (props) => {
 -      const { schemaTypeName, field, fieldSchema } = props
 +      const { schemaTypeName, name, field, fieldSchema, register, setValue } = props
-       const options = processOptions({
-         schemaTypeName,
-         field,
-@@ -59,12 +59,18 @@ export default {
-         addDefault: true
-       })
+
+       const options = processOptions(...)
  
 +      register({ name })
 +      const setValueFromEvent = event => {
@@ -498,9 +491,11 @@ Relevant changes in the Slider code:
 
 ## InputArray
 
-There's a way to convert InputArrays that doesn't involve rewritting the entire control. It's by using the skinable components. Instead of overriding array, we just have to override a couple of easier components. Those are the ones from the default skin:
+There's a way to convert InputArrays that doesn't involve rewritting the entire control, having to implement the logic too. It's done by using the skinable components. Instead of overriding `array`, we just have to override a couple of easier components. Those are the ones from the default skin:
 
 ```javascript
+{
+  // ...
   arrayButton: {
     render: Button
   },
@@ -519,6 +514,7 @@ There's a way to convert InputArrays that doesn't involve rewritting the entire 
   arrayPanel: {
     render: InputArrayPanel
   }
+}
 ```
 
 We just have to mimic InputArrayTable and InputArrayPanel. The rest of the components are trivial (Panel is a card like and the others are icons).
@@ -571,5 +567,7 @@ For more info take a look at [the wrapper](https://github.com/dgonz64/react-hook
 With this we have a complete Material-UI skin with all the features from react-hook-form-auto.
 
 Do you think this file can be improved? did you find mistakes? works for you? I would be happy to hear about your success or frustrations while using react-hook-form-auto.
+
+Also if you would like something to be demonstrated or implemented, please open an issue. I would love to take a look at it!
 
 Thanks for reading!
