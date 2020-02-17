@@ -1,68 +1,575 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Skinning with `react-hook-form-auto`
 
-## Available Scripts
+Let's create a material-ui ui with the help of `create-react-app`.
 
-In the project directory, you can run:
+## Table of contents
 
-### `yarn start`
+- [Basics](#basics)
+- [String component](#string-component)
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## Basics
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+    $ npx create-react-app rhfa-sandbox
+    $ cd rhfa-sandbox/
+    $ yarn add react-hook-form react-hook-form-auto -S
 
-### `yarn test`
+Now let's write a simple form invading `src/App.js`
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```diff
+import React from 'react';
+-import logo from './logo.svg';
+ import './App.css';
++import { createSchema, Autoform } from 'react-hook-form-auto'
++
++const thing = createSchema('thing', {
++  name: {
++    type: 'string',
++    required: true
++  },
++  mass: {
++    type: 'number'
++  },
++  type: {
++    type: 'select',
++    options: ['solid', 'liquid', 'gas']
++  }
++});
+ 
+ function App() {
+   return (
+     <div className="App">
+       <header className="App-header">
+-        <img src={logo} className="App-logo" alt="logo" />
+-        <p>
+-          Edit <code>src/App.js</code> and save to reload.
+-        </p>
+-        <a
+-          className="App-link"
+-          href="https://reactjs.org"
+-          target="_blank"
+-          rel="noopener noreferrer"
+-        >
+-          Learn React
+-        </a>
++        <Autoform
++          schema={thing}
++        />
+       </header>
+     </div>
+   );
+```
 
-### `yarn build`
+[This](https://github.com/dgonz64/rhfa-playground/blob/71ae301f3b815844d292a62538255b93148ea67f/src/App.js) is the resulting file.
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Let's test it:
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
+    $ yarn start
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Hopefully we see some (really ugly) form in the screen. The first thing I realize is that labels are in a sort of machine code. That is because translation strings haven't been adjusted. Let's do it:
 
-### `yarn eject`
+```diff
+ import React from 'react';
+ import './App.css';
+-import { createSchema, Autoform } from 'react-hook-form-auto'
++import { createSchema, Autoform, addTranslations } from 'react-hook-form-auto'
+ 
+ const thing = createSchema('thing', {
+   name: {
+@@ -16,6 +16,26 @@ const thing = createSchema('thing', {
+   }
+ });
+ 
++addTranslations({
++  models: {
++    thing: {
++      name: {
++        _field: 'Name'
++      },
++      mass: {
++        _field: 'Mass'
++      },
++      type: {
++        _field: 'Type',
++        _default: 'Select type',
++        solid: 'Solid',
++        liquid: 'Liquid',
++        gas: 'Gas'
++      }
++    }
++  }
++})
++
+ function App() {
+   return (
+     <div className="App">
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+Result here. After this change if we take a look at the browser we see that labels are good now but it's still ugly. Let's import emergency styles for now. We take the direct css-without-modules route. First install it:
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+    $ yarn add rhfa-emergency-styles -S
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+Then edit code based on [README's](https://github.com/dgonz64/rhfa-emergency-styles).
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+```diff
+ import React from 'react';
+ import './App.css';
+ import { createSchema, Autoform, addTranslations } from 'react-hook-form-auto'
++import styles from 'rhfa-emergency-styles'
++import 'rhfa-emergency-styles/dist/styles.css'
+ 
+ const thing = createSchema('thing', {
+   name: {
+@@ -42,6 +44,7 @@ function App() {
+       <header className="App-header">
+         <Autoform
+           schema={thing}
++          styles={styles}
+         />
+       </header>
+     </div>
+```
 
-## Learn More
+Now we are talking.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Before continuing with the interesting stuff, let's write something to test if the form works:
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```diff
+-import React from 'react';
++import React, { useState } from 'react';
+ import './App.css';
+-import { createSchema, Autoform, addTranslations } from 'react-hook-form-auto'
++import {
++  createSchema,
++  Autoform,
++  addTranslations,
++  tr
++} from 'react-hook-form-auto'
+ import styles from 'rhfa-emergency-styles'
+ import 'rhfa-emergency-styles/dist/styles.css'
+ 
+@@ -35,18 +40,23 @@ addTranslations({
+         gas: 'Gas'
+       }
+     }
+-  }
++  },
++  submit: 'Submit'
+ })
+ 
+ function App() {
++  const [ submitted, submit ] = useState({})
++
+   return (
+     <div className="App">
+-      <header className="App-header">
+-        <Autoform
+-          schema={thing}
+-          styles={styles}
+-        />
+-      </header>
++      <Autoform
++        schema={thing}
++        styles={styles}
++        onSubmit={submit}
++        submitButton
++        submitButtonText={tr('submit')}
++      />
++      <pre>{JSON.stringify(submitted)}</pre>
+     </div>
+   );
+ }
+```
 
-### Code Splitting
+Now every time we hit submit button, it will update the document so we can see if it works.
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
+## String component
 
-### Analyzing the Bundle Size
+Let's jump to component adaptation. Material-UI allows both controlled and uncontrolled behaviour. We will take advantage of this and write uncontrolled inputs.
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
+Install material-ui:
 
-### Making a Progressive Web App
+    $ yarn add @material-ui/core
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
+Edit `public/index.html`:
 
-### Advanced Configuration
+```diff
+       work correctly both with client-side routing and a non-root public URL.
+       Learn how to configure a non-root public URL by running `npm run build`.
+     -->
++    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
++
+     <title>React App</title>
+```
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
+In order to write the component adaptor we need at least a render attribute. Let's write it in a new file called `src/skinOverride.js` whose contents are like this:
 
-### Deployment
+```javascript
+    import React from 'react'
+    import TextField from '@material-ui/core/TextField'
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
+    export default {
+      string: {
+        render: {
+          component: TextField
+        }
+      }
+    }
+```
 
-### `yarn build` fails to minify
+Now if we execute this, we are going to have two surprises:
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+1. We are seeing older input wrapper (label and errors)
+2. It doesn't work. If we hit submit we don't see the name.
+
+To address the first problem we are going to write the wrapper. This wrapper will just forward the props to make them compatible with Material-UI.
+
+```diff
+ import React from 'react'
+ import TextField from '@material-ui/core/TextField'
++import { trModel } from 'react-hook-form-auto'
++
++const ControlAdaptor = props => {
++  const { schemaTypeName, field } = props
++
++  const Comp = props.adaptorComponent
++
++  return (
++    <Comp
++      {...props}
++      label={trModel(schemaTypeName, field, '_field')}
++    />
++  )
++}
+ 
+ export default {
++  defaultWrap: ({ children }) => children,
+   string: {
+-    render: {
+-      component: TextField
+-    }
++    render: props => ({
++      ...props,
++      component: ControlAdaptor,
++      adaptorComponent: TextField
++    })
+   }
+ }
+```
+
+We are doing here a lot of things.
+
+* Import `trModel` to translate labels.
+* `ControlAdaptor` will convert the props from what react-hook-form-auto provides to what component needs ([documentaton](https://github.com/dgonz64/react-hook-form-auto#skin-component)).
+* For the `defaultWrap` component of the skin we simply forward it ([documentation](https://github.com/dgonz64/react-hook-form-auto#inputwrap)).
+
+Now to address the second problem we will make sure all the input properties are as needed. To be able to granularly configure each kind of component, I enabled `controlProps` property in `ControlAdaptor` so `react-hook-form-auto` will forward it. This allows to set properties for the input control without colliding with `react-hook-form-auto`.
+
+If we test now the form we will see that the `name` field is correct after submit.
+
+### Small change
+
+The string `render` block in `src/skinOverride.js` is a function. Functions are used to make possible to adapt complex input controls but it's not needed here because we are only adding new attributes. In this case we can use a object directly.
+
+```diff
+ export default {
+   defaultWrap: ({ children }) => children,
+   string: {
+-    render: props => ({
+-      ...props,
++    render: {
+       component: ControlAdaptor,
+       adaptorComponent: TextField
+-    })
++    }
+   }
+ }
+```
+
+### Numbers
+
+It's the time to take advantage of the `controlProps` we set up in `ControlAdaptor`. For the number we will just pass a `type="number"` html attribute:
+
+```diff
+       component: ControlAdaptor,
+       adaptorComponent: TextField
+     }
++  },
++  number: {
++    render: {
++      component: ControlAdaptor,
++      adaptorComponent: TextField,
++      controlProps: { type: 'number' }
++    }
+   }
+```
+
+## Error reporting
+
+We have to print the validation errors. First of all we will set the default language in order to get also the default translation for basic validations:
+
+```diff
+diff --git a/src/App.js b/src/App.js
+index d26f4ca..a0c2888 100644
+--- a/src/App.js
++++ b/src/App.js
+@@ -4,6 +4,7 @@ import {
+   createSchema,
+   Autoform,
+   addTranslations,
++  setLanguageByName,
+   tr
+ } from 'react-hook-form-auto';
+ import styles from 'rhfa-emergency-styles';
+@@ -33,6 +34,7 @@ const thing = createSchema('thing', {
+   }
+ });
+ 
++setLanguageByName('en')
+ addTranslations({
+   models: {
+     thing: {
+```
+
+Then we wire the `react-hook-form-auto` error messages to Material-UI.
+
+```diff
+diff --git a/src/skinOverride.js b/src/skinOverride.js
+index 80375ed..b6a1e0e 100644
+--- a/src/skinOverride.js
++++ b/src/skinOverride.js
+@@ -1,19 +1,23 @@
+ import React from 'react'
+ import TextField from '@material-ui/core/TextField'
+-import { trModel } from 'react-hook-form-auto'
++import { trModel, tr } from 'react-hook-form-auto'
+ 
+ const ControlAdaptor = props => {
+   const {
+     name,
+     defaultValue,
+     controlProps,
++    errors,
+ 
+     field,
++    fieldSchema,
+     schemaTypeName,
+     adaptorComponent,
+     register
+   } = props
+ 
++  const error = errors[field]
++  const errorText = typeof error == 'object' ? tr(error.message, fieldSchema) : ''
+   const Comp = adaptorComponent
+ 
+   return (
+@@ -23,6 +27,8 @@ const ControlAdaptor = props => {
+       defaultValue={defaultValue}
+       inputProps={{ ref: register }}
+       label={trModel(schemaTypeName, field, '_field')}
++      error={!!errorText}
++      helperText={errorText}
+     />
+   )
+ }
+
+```
+
+Now if we go to the app and try to submit without writing a name, we will see red things.
+
+## Adapting select
+
+This is easy by following Material-UI documentaton. I just want to note that we can use `processOptions` export from `react-hook-form-auto`. It will take the control props and will generate the options array with `{ value, label }` attributes.
+
+```diff
+ import React from 'react'
+ import TextField from '@material-ui/core/TextField'
+-import { trModel, tr } from 'react-hook-form-auto'
++import MenuItem from '@material-ui/core/MenuItem'
++import { trModel, tr, processOptions } from 'react-hook-form-auto'
+ 
+ const ControlAdaptor = props => {
+   const {
+@@ -47,5 +48,30 @@ export default {
+       adaptorComponent: TextField,
+       controlProps: { type: 'number' }
+     }
++  },
++  select: {
++    render: (props) => {
++      const { schemaTypeName, field, fieldSchema } = props
++      const options = processOptions({
++        schemaTypeName,
++        field,
++        options: fieldSchema.options,
++        addDefault: true
++      })
++
++      return {
++        ...props,
++        component: ControlAdaptor,
++        adaptorComponent: TextField,
++        controlProps: {
++          select: true,
++          children: options.map(op =>
++            <MenuItem key={op.value} value={op.value}>
++              {op.label}
++            </MenuItem>
++          )
++        }
++      }
++    }
+   }
+ }
+```
+
+Nice, except it doesn't work! We need ReactHookForm to notice it. There are multiple ways to do. A simple one is to register the field manually and call `react-hook-form-auto` `setValue`'s.
+
+```diff
+   select: {
+     render: (props) => {
+-      const { schemaTypeName, field, fieldSchema } = props
++      const { schemaTypeName, name, field, fieldSchema, register, setValue } = props
+       const options = processOptions({
+         schemaTypeName,
+         field,
+@@ -59,12 +59,18 @@ export default {
+         addDefault: true
+       })
+ 
++      register({ name })
++      const setValueFromEvent = event => {
++        setValue(name, event.target.value)
++      }
++
+       return {
+         ...props,
+         component: ControlAdaptor,
+         adaptorComponent: TextField,
+         controlProps: {
+           select: true,
++          onChange: setValueFromEvent,
+           children: options.map(op =>
+             <MenuItem key={op.value} value={op.value}>
+               {op.label}
+```
+
+## Rest
+
+Now iterate. The rest of the components can be adapted without the need of additional register witchery. Just some notes.
+
+* I filled all the coerces to let the numbers and boolean have its correct types
+* Some components can be ecouraged to honor the `ref`. I use it, sometimes passing it through Material-UI's `inputProps`.
+* Result [here](https://github.com/dgonz64/rhfa-playground/blob/c110a620025263384f7b443d742df8ecd0b79319/src/skinOverride.js)
+
+We adapt the rest of the normal input controls. We can see the changes here.
+
+## Tip: Pass parameters from schema
+
+Access `fieldSchema` prop. It contains the original schema specification for the field. Here I pass additional config to the slider through `sliderParams` (not used in react-hook-form-auto)
+
+```diff
+@@ -52,7 +52,11 @@ const thing = createSchema('thing', {
+   solid: {
+     type: 'range',
+     min: -273.15,
+     max: 1000,
++    sliderParams: {
++      step: 10,
++      marks: [{ value: 0, label: '0 º' }, { value: 100, label: '100 º' }]
++    }
+   }
+ });
+```
+
+Relevant changes in the Slider code:
+
+```diff
+           setValue(name, value)
+         }
+ 
++        const { sliderParams } = fieldSchema
++
+         return (
+           <div>
+             <Slider
++              {...sliderParams}
+               defaultValue={defaultValue || 0}
+ ```
+
+## InputArray
+
+There's a way to convert InputArrays that doesn't involve rewritting the entire control. It's by using the skinable components. Instead of overriding array, we just have to override a couple of easier components. Those are the ones from the default skin:
+
+```javascript
+  arrayButton: {
+    render: Button
+  },
+  panel: {
+    render: Panel
+  },
+  addGlyph: {
+    render: AddGlyph
+  },
+  removeGlyph: {
+    render: RemoveGlyph
+  },
+  arrayTable: {
+    render: InputArrayTable
+  },
+  arrayPanel: {
+    render: InputArrayPanel
+  }
+```
+
+We just have to mimic InputArrayTable and InputArrayPanel. The rest of the components are trivial (Panel is a card like and the others are icons).
+
+First we create some composable schema:
+
+```diff
++const component = createSchema('component', {
++  name: {
++    type: 'string',
++    required: true
++  },
++  temperature: {
++    type: 'number',
++    min: -273.15,
++    max: 1000
++  },
++})
++
+ const thing = createSchema('thing', {
+       step: 10,
+       marks: [{ value: 0, label: '0 º' }, { value: 100, label: '100 º' }]
+     }
++  },
++  components: {
++    type: [component]
++  },
++  main: {
++    type: component
+   }
+ });
+```
+
+Then we just fill the skin components mimicking this components:
+
+* [`InputArrayPanel`](https://github.com/dgonz64/react-hook-form-auto/blob/master/src/ui/components/InputArrayPanel.jsx). Uses boxes/cards/panels to separate elements.
+* [`InputArrayTable`](https://github.com/dgonz64/react-hook-form-auto/blob/master/src/ui/components/InputArrayTable.jsx). Uses tabular arrangement.
+
+Some pointers:
+
+* `name` prop includes full path compatible with dom and ReactHookForm
+* `items` prop will be an array of `{ idx, closeButton, inputs }`. `idx` is the index, `closeButton` a button to render somewhere and inputs an array of nodes with the rendered inputs.
+* `arrayIdx` will be set to the index of the current element. Please note they aren't necessarily contiguous.
+* `arrayInitialValues` possible initial values for the array
+
+For more info take a look at [the wrapper](https://github.com/dgonz64/react-hook-form-auto/blob/master/src/ui/components/InputArrayWrap.jsx).
+
+## Final words
+
+With this we have a complete Material-UI skin with all the features from react-hook-form-auto.
+
+Do you think this file can be improved? did you find mistakes? works for you? I would be happy to hear about your success or frustrations while using react-hook-form-auto.
+
+Thanks for reading!
