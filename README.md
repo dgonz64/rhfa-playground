@@ -21,7 +21,7 @@ Let's create a material-ui ui with the help of `create-react-app`.
     $ cd rhfa-sandbox/
     $ yarn add react-hook-form react-hook-form-auto -S
 
-Now let's write a simple form invading `src/App.js`
+Now let's write a simple form invading `src/App.js`. Note that I have a very liberal use of semicolons. I hope it doesn't gets to your nerves. Please, bear with me.
 
 ```diff
 import React from 'react';
