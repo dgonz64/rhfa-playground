@@ -4,7 +4,7 @@ Let's create a material-ui ui with the help of `create-react-app`.
 
 ## Table of contents
 
-* [Basics](#basics)
+* [Setup project](#setup-project)
 * [String component](#string-component)
   * [Ways to set up render](#small-change)
   * [Numbers](#numbers)
@@ -15,7 +15,7 @@ Let's create a material-ui ui with the help of `create-react-app`.
 * [Input array](#inputarray)
 * [Thanks](#final-words)
 
-## Basics
+## Setup project
 
     $ npx create-react-app rhfa-sandbox
     $ cd rhfa-sandbox/
