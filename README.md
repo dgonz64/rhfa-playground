@@ -454,8 +454,6 @@ Now iterate. The rest of the components can be adapted without the need of addit
 * Some components can be ecouraged to honor the `ref`. I use it, sometimes passing it through Material-UI's `inputProps`.
 * Result [here](https://github.com/dgonz64/rhfa-playground/blob/c110a620025263384f7b443d742df8ecd0b79319/src/skinOverride.js)
 
-We adapt the rest of the normal input controls. We can see the changes here.
-
 ## Tip: Pass parameters from schema
 
 Access `fieldSchema` prop. It contains the original schema specification for the field. Here I pass additional config to the slider through `sliderParams` (not used in react-hook-form-auto)
