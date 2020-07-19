@@ -13,6 +13,7 @@ Let's create a material-ui ui with the help of `create-react-app`.
 * [Rest of the components](#rest)
 * [Pass parameters from schema](#tip-pass-parameters-from-schema)
 * [Input array](#inputarray)
+* [Controlled components](#controlled)
 * [Thanks](#final-words)
 
 ## Setup project
@@ -559,6 +560,51 @@ Some pointers:
 * `arrayInitialValues` possible initial values for the array
 
 For more info take a look at [the wrapper](https://github.com/dgonz64/react-hook-form-auto/blob/master/src/ui/components/InputArrayWrap.jsx).
+
+## Controlled components
+
+Thanks to the amazing people behind ReactHookForm, we can adapt also controlled components. This is done by using a `<Controller />` and passing it `formHooks.control`. Example from some skinOverride that needs to control a component:
+
+```javascript
+  boolean: {
+    wrapper: (props) => props.children,
+    coerce: value => Boolean(value),
+    render: {
+      component: (props) => {
+        const {
+          register,
+          name,
+          defaultValue,
+          formHook,
+          control
+        } = props
+
+        const label = trField(props)
+
+        const renderCheckbox = ({ value, onChange, onBlur }) =>
+          <Checkbox
+            key={name}
+            name={name}
+            inputProps={{ ref: register }}
+            value={value}
+            onChange={(e) => { onChange(e.target.checked) }}
+            onBlur={onBlur}
+            label={label}
+          />
+
+        return (
+          <Controller
+            key={name}
+            name={name}
+            control={formHook.control}
+            defaultValue={defaultValue}
+            render={renderCheckbox}
+          />
+        )
+      }
+    }
+  }
+```
 
 ## Final words
 
