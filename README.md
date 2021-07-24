@@ -225,12 +225,9 @@ In order to write the component adaptor we need at least a render attribute. Let
     }
 ```
 
-Now if we execute this, we are going to have two surprises:
+Now if we execute this, we are going to have a surprise: . We are seeing older input wrapper (label and errors)
 
-1. We are seeing older input wrapper (label and errors)
-2. It doesn't work. If we hit submit we don't see the name.
-
-To address the first problem we are going to write the wrapper. This wrapper will just forward the props to make them compatible with Material-UI.
+To address the problem we are going to write the wrapper. This wrapper will just forward the props to make them compatible with Material-UI.
 
 ```diff
  import React from 'react'
@@ -271,9 +268,7 @@ We are doing here a lot of things.
 * `ControlAdaptor` will convert the props from what react-hook-form-auto provides to what component needs ([documentaton](https://github.com/dgonz64/react-hook-form-auto#skin-component)).
 * For the `defaultWrap` component of the skin we simply forward it ([documentation](https://github.com/dgonz64/react-hook-form-auto#inputwrap)).
 
-Now to address the second problem we will make sure all the input properties are as needed. To be able to granularly configure each kind of component, I enabled `controlProps` property in `ControlAdaptor` so `react-hook-form-auto` will forward it. This allows to set properties for the input control without colliding with `react-hook-form-auto`.
-
-If we test now the form we will see that the `name` field is correct after submit.
+The `ControlAdaptor` will receive props that will be passed directory to `TextField` needed to make it work, like `id`, `name`, `onChange`, etc.
 
 ### Small change
 
@@ -296,7 +291,7 @@ The string `render` block in `src/skinOverride.js` is a function. Functions are 
 
 ### Numbers
 
-It's the time to take advantage of the `controlProps` we set up in `ControlAdaptor`. For the number we will just pass a `type="number"` html attribute:
+It's time to take advantage of the `controlProps` we set up in `ControlAdaptor`. For the number we will just pass a `type="number"` html attribute:
 
 ```diff
        component: ControlAdaptor,
@@ -338,33 +333,29 @@ Then we wire the `react-hook-form-auto` error messages to Material-UI in `src/sk
 ```diff
  import React from 'react'
  import TextField from '@material-ui/core/TextField'
--import { trModel } from 'react-hook-form-auto'
-+import { trModel, tr } from 'react-hook-form-auto'
+ import { trModel } from 'react-hook-form-auto'
  
  const ControlAdaptor = props => {
    const {
+     id,
      name,
      defaultValue,
+     onChange,
      controlProps,
-+    errors,
++    errorText,
  
      field,
-+    fieldSchema,
      schemaTypeName,
      adaptorComponent,
      register
    } = props
  
-+  const error = errors[field]
-+  const errorText = typeof error == 'object' ? tr(error.message, fieldSchema) : ''
    const Comp = adaptorComponent
  
    // ...
 
-const ControlAdaptor = props => {
-       defaultValue={defaultValue}
-       inputProps={{ ref: register }}
-       label={trModel(schemaTypeName, field, '_field')}
+   <Comp
+       ...
 +      error={!!errorText}
 +      helperText={errorText}
      />
@@ -418,33 +409,6 @@ This is easy by following Material-UI documentaton. I just want to note that we 
 +    }
    }
  }
-```
-
-Nice, except it doesn't work! We need ReactHookForm to notice it. There are multiple ways to do. A simple one is to register the field manually and call `react-hook-form-auto` `setValue`'s.
-
-```diff
-   select: {
-     render: (props) => {
--      const { schemaTypeName, field, fieldSchema } = props
-+      const { schemaTypeName, name, field, fieldSchema, register, setValue } = props
-
-       const options = processOptions(...)
- 
-+      register({ name })
-+      const setValueFromEvent = event => {
-+        setValue(name, event.target.value)
-+      }
-+
-       return {
-         ...props,
-         component: ControlAdaptor,
-         adaptorComponent: TextField,
-         controlProps: {
-           select: true,
-+          onChange: setValueFromEvent,
-           children: options.map(op =>
-             <MenuItem key={op.value} value={op.value}>
-               {op.label}
 ```
 
 ## Rest
@@ -556,49 +520,33 @@ Some pointers:
 
 * `name` prop includes full path compatible with dom and ReactHookForm
 * `items` prop will be an array of `{ idx, closeButton, inputs }`. `idx` is the index, `closeButton` a button to render somewhere and inputs an array of nodes with the rendered inputs.
-* `arrayIdx` will be set to the index of the current element. Please note they aren't necessarily contiguous.
-* `arrayInitialValues` possible initial values for the array
+* `index` will be set to the index of the current element. Please note they aren't necessarily contiguous.
+* `defaultValue` possible initial values for the array
 
 For more info take a look at [the wrapper](https://github.com/dgonz64/react-hook-form-auto/blob/master/src/ui/components/InputArrayWrap.jsx).
 
 ## Controlled components
 
-Thanks to the amazing people behind ReactHookForm, we can adapt also controlled components. This is done by using a `<Controller />` and passing it `formHooks.control`. Example from some skinOverride that needs to control a component:
+Thanks to the amazing people behind ReactHookForm, we can adapt also controlled components. This is done under the hood by using `useController`. Example from some skinOverride that needs to control a component:
 
 ```javascript
   boolean: {
     wrapper: (props) => props.children,
     coerce: value => Boolean(value),
+    controlled: true,
     render: {
       component: (props) => {
-        const {
-          register,
-          name,
-          defaultValue,
-          formHook,
-          control
-        } = props
+        const { id, name, value, onChange, onBlur } = props
 
         const label = trField(props)
 
-        const renderCheckbox = ({ value, onChange, onBlur }) =>
+        return (
           <Checkbox
-            key={name}
             name={name}
-            inputProps={{ ref: register }}
             value={value}
-            onChange={(e) => { onChange(e.target.checked) }}
+            onChange={onChange}
             onBlur={onBlur}
             label={label}
-          />
-
-        return (
-          <Controller
-            key={name}
-            name={name}
-            control={formHook.control}
-            defaultValue={defaultValue}
-            render={renderCheckbox}
           />
         )
       }
