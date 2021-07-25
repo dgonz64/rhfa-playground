@@ -4,6 +4,7 @@ Let's create a material-ui ui with the help of `create-react-app`.
 
 ## Table of contents
 
+* [Version warning](#version-warning)
 * [Setup project](#setup-project)
 * [String component](#string-component)
   * [Ways to set up render](#small-change)
@@ -15,6 +16,10 @@ Let's create a material-ui ui with the help of `create-react-app`.
 * [Input array](#inputarray)
 * [Controlled components](#controlled)
 * [Thanks](#final-words)
+
+## Version warning
+
+This project is made for an older version of react-hook-form-auto. Only this readme has been updated to react-hook-form-auto 1.3, so "do what I say, not what I do".
 
 ## Setup project
 
