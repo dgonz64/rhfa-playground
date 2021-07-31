@@ -47,7 +47,7 @@ import React from 'react';
 +    type: 'select',
 +    options: ['solid', 'liquid', 'gas']
 +  }
-+});
++})
  
  function App() {
    return (
@@ -333,7 +333,7 @@ import {
      thing: {
 ```
 
-Then we wire the `react-hook-form-auto` error messages to Material-UI in `src/skinOverride.js`:
+Then we wire the `react-hook-form-auto` error and helper messages to Material-UI in `src/skinOverride.js`:
 
 ```diff
  import React from 'react'
@@ -345,9 +345,9 @@ Then we wire the `react-hook-form-auto` error messages to Material-UI in `src/sk
      id,
      name,
      defaultValue,
-     onChange,
      controlProps,
 +    errorText,
++    helperText,
  
      field,
      schemaTypeName,
@@ -362,7 +362,7 @@ Then we wire the `react-hook-form-auto` error messages to Material-UI in `src/sk
    <Comp
        ...
 +      error={!!errorText}
-+      helperText={errorText}
++      helperText={errorText || helperText}
      />
    )
  }
