@@ -7,7 +7,7 @@ Let's create a material-ui ui with the help of `create-react-app`.
 * [Version warning](#version-warning)
 * [Setup project](#setup-project)
 * [String component](#string-component)
-  * [Ways to set up render](#small-change)
+  * [Ways to set up props](#small-change)
   * [Numbers](#numbers)
 * [Error reporting](#error-reporting)
 * [Select](#adapting-select)
@@ -215,7 +215,7 @@ Edit `public/index.html`:
      <title>React App</title>
 ```
 
-In order to write the component adaptor we need at least a render attribute. Let's write it in a new file called `src/skinOverride.js` whose contents are like this:
+In order to write the component adaptor we need at least a `props` attribute. Let's write it in a new file called `src/skinOverride.js` whose contents are like this:
 
 ```javascript
     import React from 'react'
@@ -223,14 +223,12 @@ In order to write the component adaptor we need at least a render attribute. Let
 
     export default {
       string: {
-        render: {
-          component: TextField
-        }
+        component: TextField
       }
     }
 ```
 
-Now if we execute this, we are going to have a surprise: . We are seeing older input wrapper (label and errors)
+Now if we execute this, we are going to have a surprise. We are seeing older input wrapper (label and errors)
 
 To address the problem we are going to write the wrapper. This wrapper will just forward the props to make them compatible with Material-UI.
 
@@ -255,10 +253,8 @@ To address the problem we are going to write the wrapper. This wrapper will just
  export default {
 +  defaultWrap: ({ children }) => children,
    string: {
--    render: {
--      component: TextField
--    }
-+    render: props => ({
+-    component: TextField
++    props: props => ({
 +      ...props,
 +      component: ControlAdaptor,
 +      adaptorComponent: TextField
@@ -277,15 +273,15 @@ The `ControlAdaptor` will receive props that will be passed directory to `TextFi
 
 ### Small change
 
-The string `render` block in `src/skinOverride.js` is a function. Functions are used to make possible to adapt complex input controls but it's not needed here because we are only adding new attributes. In this case we can use a object directly.
+The string `props` block in `src/skinOverride.js` is a function. Functions are used to make possible to adapt complex input controls but it's not needed here because we are only adding new attributes. In this case we can use a object directly.
 
 ```diff
  export default {
    defaultWrap: ({ children }) => children,
    string: {
--    render: props => ({
+-    props: props => ({
 -      ...props,
-+    render: {
++    props: {
        component: ControlAdaptor,
        adaptorComponent: TextField
 -    })
@@ -304,7 +300,7 @@ It's time to take advantage of the `controlProps` we set up in `ControlAdaptor`.
      }
 +  },
 +  number: {
-+    render: {
++    props: {
 +      component: ControlAdaptor,
 +      adaptorComponent: TextField,
 +      controlProps: { type: 'number' }
@@ -389,7 +385,7 @@ This is easy by following Material-UI documentaton. I just want to note that we 
      }
 +  },
 +  select: {
-+    render: (props) => {
++    props: (props) => {
 +      const { schemaTypeName, field, fieldSchema } = props
 +      const options = processOptions({
 +        schemaTypeName,
@@ -465,22 +461,22 @@ There's a way to convert InputArrays that doesn't involve rewritting the entire 
 {
   // ...
   arrayButton: {
-    render: Button
+    component: Button
   },
   panel: {
-    render: Panel
+    component: Panel
   },
   addGlyph: {
-    render: AddGlyph
+    component: AddGlyph
   },
   removeGlyph: {
-    render: RemoveGlyph
+    component: RemoveGlyph
   },
   arrayTable: {
-    render: InputArrayTable
+    component: InputArrayTable
   },
   arrayPanel: {
-    render: InputArrayPanel
+    component: InputArrayPanel
   }
 }
 ```
@@ -539,22 +535,20 @@ Thanks to the amazing people behind ReactHookForm, we can adapt also controlled 
     wrapper: (props) => props.children,
     coerce: value => Boolean(value),
     controlled: true,
-    render: {
-      component: (props) => {
-        const { id, name, value, onChange, onBlur } = props
+    component: (props) => {
+      const { id, name, value, onChange, onBlur } = props
 
-        const label = trField(props)
+      const label = trField(props)
 
-        return (
-          <Checkbox
-            name={name}
-            value={value}
-            onChange={onChange}
-            onBlur={onBlur}
-            label={label}
-          />
-        )
-      }
+      return (
+        <Checkbox
+          name={name}
+          value={value}
+          onChange={onChange}
+          onBlur={onBlur}
+          label={label}
+        />
+      )
     }
   }
 ```
